@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Incident Journal — SAFEHOLD</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/components.css"
+    >
+
+</head>
+
+
+<body>
+
+    <main class="page-shell">
+
+        <div class="page-container">
+
+            <header class="top-bar">
+
+                <a
+                    class="brand"
+                    href="home.html"
+                >
+                    SAFEHOLD
+                </a>
+
+                <a
+                    class="button-secondary"
+                    href="home.html"
+                >
+                    Back
+                </a>
+
+            </header>
+
+
+            <section class="card">
+
+                <p class="eyebrow">
+                    DOCUMENTATION
+                </p>
+
+                <h1 class="page-title">
+                    Incident Journal
+                </h1>
+
+                <p class="page-description">
+                    Write down what happened in your own words.
+                    You control what you record and what happens
+                    with it later.
+                </p>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    New entry
+                </h2>
+
+                <form id="incident-form">
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="description"
+                        >
+                            What happened?
+                        </label>
+
+                        <textarea
+                            class="form-textarea"
+                            id="description"
+                            name="description"
+                            maxlength="10000"
+                            required
+                        ></textarea>
+
+                        <p class="form-help">
+                            Use your own words. You do not need
+                            to make the description formal.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="incident-date"
+                        >
+                            Date and time
+                        </label>
+
+                        <input
+                            class="form-input"
+                            id="incident-date"
+                            name="incident_date"
+                            type="datetime-local"
+                        >
+
+                        <p class="form-help">
+                            You can leave this blank if you are
+                            unsure or do not want to record it.
+                        </p>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="location"
+                        >
+                            Location
+                        </label>
+
+                        <input
+                            class="form-input"
+                            id="location"
+                            name="location"
+                            type="text"
+                            maxlength="255"
+                            placeholder="Optional"
+                        >
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label
+                            class="form-label"
+                            for="witnesses"
+                        >
+                            Witnesses
+                        </label>
+
+                        <textarea
+                            class="form-textarea"
+                            id="witnesses"
+                            name="witnesses"
+                            maxlength="5000"
+                            style="min-height: 100px;"
+                        ></textarea>
+
+                        <p class="form-help">
+                            Optional. Do not include information
+                            you do not feel safe recording.
+                        </p>
+
+                    </div>
+
+
+                    <div
+                        id="form-message"
+                        class="message hidden"
+                    ></div>
+
+
+                    <div class="form-actions">
+
+                        <button
+                            class="button button-primary"
+                            type="submit"
+                        >
+                            Save privately
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    Your journal
+                </h2>
+
+                <p class="page-description">
+                    Your saved incidents appear here.
+                </p>
+
+                <div
+                    id="incident-list"
+                    class="incident-list"
+                >
+                    <div class="empty-state">
+                        Loading your journal...
+                    </div>
+                </div>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script src="../js/auth.js"></script>
+
+    <script src="../js/api.js"></script>
+
+    <script src="../js/incidents.js"></script>
+
+    <script>
+
+        requireAuthentication();
+
+
+        const form =
+            document.getElementById(
+                "incident-form"
+            );
+
+
+        const message =
+            document.getElementById(
+                "form-message"
+            );
+
+
+        const incidentList =
+            document.getElementById(
+                "incident-list"
+            );
+
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            message.textContent = text;
+
+            message.className =
+                `message message-${type}`;
+
+        }
+
+
+        function clearForm() {
+
+            form.reset();
+
+        }
+
+
+        function escapeHtml(value) {
+
+            const div =
+                document.createElement("div");
+
+            div.textContent =
+                value ?? "";
+
+            return div.innerHTML;
+
+        }
+
+
+        function formatDate(value) {
+
+            if (!value) {
+                return "Date not recorded";
+            }
+
+            const date =
+                new Date(value);
+
+            if (Number.isNaN(date.getTime())) {
+                return "Date not recorded";
+            }
+
+            return date.toLocaleString();
+
+        }
+
+
+        function renderIncidents(
+            incidents
+        ) {
+
+            if (!incidents.length) {
+
+                incidentList.innerHTML = `
+                    <div class="empty-state">
+                        You have not created any journal
+                        entries yet.
+                    </div>
+                `;
+
+                return;
+            }
+
+
+            incidentList.innerHTML =
+                incidents.map(
+                    incident => `
+                        <article
+                            class="incident-item"
+                        >
+
+                            <div
+                                class="incident-item-header"
+                            >
+
+                                <div>
+
+                                    <div
+                                        class="incident-title"
+                                    >
+                                        ${escapeHtml(
+                                            formatDate(
+                                                incident.incident_date
+                                            )
+                                        )}
+                                    </div>
+
+                                    <p
+                                        class="incident-preview"
+                                    >
+                                        ${escapeHtml(
+                                            incident.description
+                                                .slice(0, 180)
+                                        )}
+                                        ${
+                                            incident.description.length > 180
+                                                ? "..."
+                                                : ""
+                                        }
+                                    </p>
+
+                                </div>
+
+                                <span
+                                    class="status-badge"
+                                >
+                                    ${escapeHtml(
+                                        incident.status
+                                    )}
+                                </span>
+
+                            </div>
+
+
+                            <div class="form-actions">
+
+                                <button
+                                    class="button-secondary"
+                                    type="button"
+                                    onclick="deleteJournalEntry(
+                                        ${incident.id}
+                                    )"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </article>
+                    `
+                ).join("");
+
+        }
+
+
+        async function loadIncidents() {
+
+            try {
+
+                const incidents =
+                    await getIncidents();
+
+                renderIncidents(
+                    incidents
+                );
+
+            } catch (error) {
+
+                incidentList.innerHTML = `
+                    <div class="message message-error">
+                        ${escapeHtml(
+                            error.message
+                        )}
+                    </div>
+                `;
+
+            }
+
+        }
+
+
+        async function deleteJournalEntry(
+            incidentId
+        ) {
+
+            const confirmed =
+                window.confirm(
+                    "Delete this journal entry?"
+                );
+
+            if (!confirmed) {
+                return;
+            }
+
+
+            try {
+
+                await deleteIncident(
+                    incidentId
+                );
+
+                await loadIncidents();
+
+            } catch (error) {
+
+                showMessage(
+                    error.message,
+                    "error"
+                );
+
+            }
+
+        }
+
+
+        form.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+
+                const description =
+                    document
+                        .getElementById(
+                            "description"
+                        )
+                        .value
+                        .trim();
+
+
+                const incidentDate =
+                    document
+                        .getElementById(
+                            "incident-date"
+                        )
+                        .value;
+
+
+                const location =
+                    document
+                        .getElementById(
+                            "location"
+                        )
+                        .value
+                        .trim();
+
+
+                const witnesses =
+                    document
+                        .getElementById(
+                            "witnesses"
+                        )
+                        .value
+                        .trim();
+
+
+                if (!description) {
+
+                    showMessage(
+                        "Please describe what happened.",
+                        "error"
+                    );
+
+                    return;
+
+                }
+
+
+                const incidentData = {
+                    description,
+                    incident_date:
+                        incidentDate
+                            ? new Date(
+                                incidentDate
+                            ).toISOString()
+                            : null,
+                    location:
+                        location || null,
+                    witnesses:
+                        witnesses || null
+                };
+
+
+                try {
+
+                    await createIncident(
+                        incidentData
+                    );
+
+
+                    showMessage(
+                        "Your journal entry was saved privately.",
+                        "success"
+                    );
+
+
+                    clearForm();
+
+                    await loadIncidents();
+
+                } catch (error) {
+
+                    showMessage(
+                        error.message,
+                        "error"
+                    );
+
+                }
+
+            }
+        );
+
+
+        loadIncidents();
+
+    </script>
+
+</body>
+
+</html>
