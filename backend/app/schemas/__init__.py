@@ -1,3 +1,8 @@
+from app.schemas.incident import (
+    IncidentCreate,
+    IncidentResponse,
+    IncidentUpdate,
+)
 from app.schemas.user import (
     TokenResponse,
     UserLogin,
@@ -6,6 +11,9 @@ from app.schemas.user import (
 )
 
 __all__ = [
+    "IncidentCreate",
+    "IncidentResponse",
+    "IncidentUpdate",
     "TokenResponse",
     "UserLogin",
     "UserRegister",
