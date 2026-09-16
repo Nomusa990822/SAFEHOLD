@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Home — SAFEHOLD</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/global.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="../css/components.css"
+    >
+
+</head>
+
+
+<body>
+
+    <main class="page-shell">
+
+        <div class="page-container">
+
+            <header class="top-bar">
+
+                <div class="brand">
+                    SAFEHOLD
+                </div>
+
+                <button
+                    class="button-secondary"
+                    id="logout-button"
+                    type="button"
+                >
+                    Sign out
+                </button>
+
+            </header>
+
+
+            <section class="card">
+
+                <p class="eyebrow">
+                    YOUR SAFE SPACE
+                </p>
+
+                <h1 class="page-title">
+                    What do you need right now?
+                </h1>
+
+                <p class="page-description">
+                    Choose what feels appropriate for you.
+                    SAFEHOLD does not decide what you should do.
+                </p>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    Document
+                </h2>
+
+                <p class="page-description">
+                    Record what happened in your own words.
+                    You can save it privately and decide later
+                    what, if anything, you want to do with it.
+                </p>
+
+                <div class="form-actions">
+
+                    <a
+                        class="button button-primary"
+                        href="incident.html"
+                    >
+                        Open Incident Journal
+                    </a>
+
+                </div>
+
+            </section>
+
+
+            <section class="card">
+
+                <h2>
+                    Other SAFEHOLD features
+                </h2>
+
+                <p class="page-description">
+                    Support, safety planning, trusted contacts,
+                    evidence and prevention features will be
+                    connected as we build the application.
+                </p>
+
+            </section>
+
+        </div>
+
+    </main>
+
+
+    <script src="../js/auth.js"></script>
+
+    <script src="../js/api.js"></script>
+
+    <script>
+
+        requireAuthentication();
+
+
+        document
+            .getElementById("logout-button")
+            .addEventListener(
+                "click",
+                logout
+            );
+
+    </script>
+
+</body>
+
+</html>
