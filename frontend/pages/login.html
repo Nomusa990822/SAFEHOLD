@@ -2,41 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
+    <title>Sign In | SAFEHOLD</title>
 
-    <title>Sign in — SAFEHOLD</title>
-
-    <link
-        rel="stylesheet"
-        href="../css/global.css"
-    >
+    <link rel="stylesheet" href="../css/global.css">
+    <link rel="stylesheet" href="../css/components.css">
+    <link rel="stylesheet" href="../css/responsive.css">
 </head>
 
 <body>
+    <main class="auth-page">
+        <section class="auth-card">
 
-    <main class="welcome-page">
+            <div class="auth-header">
+                <a href="../index.html" class="brand">
+                    SAFEHOLD
+                </a>
 
-        <section class="welcome-card">
+                <h1>Welcome back</h1>
 
-            <p class="eyebrow">
-                SAFEHOLD
-            </p>
+                <p>
+                    Sign in to access your private SAFEHOLD space.
+                </p>
+            </div>
 
-            <h1>
-                Your private space.
-            </h1>
+            <div id="login-message" class="message hidden"></div>
 
-            <p class="welcome-text">
-                Authentication will be connected here.
-            </p>
+            <form id="login-form" class="form">
+
+                <div class="form-group">
+                    <label for="email">Email address</label>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        autocomplete="current-password"
+                        minlength="8"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="login-button"
+                    class="button button-primary button-full"
+                >
+                    Sign in
+                </button>
+
+            </form>
+
+            <div class="auth-footer">
+                <p>
+                    Don't have an account?
+                    <a href="register.html">Create one</a>
+                </p>
+
+                <p>
+                    <a href="../index.html">Return to SAFEHOLD</a>
+                </p>
+            </div>
 
         </section>
-
     </main>
 
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+
+    <script>
+        redirectIfAuthenticated();
+
+        const form = document.getElementById("login-form");
+        const button = document.getElementById("login-button");
+        const message = document.getElementById("login-message");
+
+        function showMessage(text, type = "error") {
+            message.textContent = text;
+            message.className = `message message-${type}`;
+        }
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const email = document
+                .getElementById("email")
+                .value
+                .trim();
+
+            const password = document
+                .getElementById("password")
+                .value;
+
+            button.disabled = true;
+            button.textContent = "Signing in...";
+
+            message.className = "message hidden";
+
+            try {
+                await loginUser(email, password);
+
+                showMessage(
+                    "Sign in successful. Opening SAFEHOLD...",
+                    "success"
+                );
+
+                window.location.href = "home.html";
+
+            } catch (error) {
+                clearToken();
+
+                showMessage(
+                    error.message || "Unable to sign in.",
+                    "error"
+                );
+
+                button.disabled = false;
+                button.textContent = "Sign in";
+            }
+        });
+    </script>
 </body>
 </html>
